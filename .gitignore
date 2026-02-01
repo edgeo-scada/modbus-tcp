@@ -1,5 +1,5 @@
 # Binaries
-modbuscli
+/modbuscli
 *.exe
 *.dll
 *.so
