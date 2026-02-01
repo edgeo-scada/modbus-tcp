@@ -1,0 +1,67 @@
+/**
+ * Edgeo Drivers Documentation - Custom CSS
+ */
+
+:root {
+  --ifm-color-primary: #2563eb;
+  --ifm-color-primary-dark: #1d4ed8;
+  --ifm-color-primary-darker: #1e40af;
+  --ifm-color-primary-darkest: #1e3a8a;
+  --ifm-color-primary-light: #3b82f6;
+  --ifm-color-primary-lighter: #60a5fa;
+  --ifm-color-primary-lightest: #93c5fd;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93c5fd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Code blocks */
+.prism-code {
+  font-size: 14px;
+}
+
+/* Tables */
+table {
+  display: table;
+  width: 100%;
+}
+
+/* Sidebar */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-toc-border-color);
+}
+
+/* Better headings */
+h1 {
+  font-weight: 700;
+}
+
+h2 {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  padding-bottom: 0.5rem;
+}
+
+/* Code in headers */
+h1 code, h2 code, h3 code {
+  font-size: inherit;
+}
+
+/* Navbar */
+.navbar__title {
+  font-weight: 700;
+}
+
+/* Footer links */
+.footer__link-item {
+  line-height: 2;
+}
