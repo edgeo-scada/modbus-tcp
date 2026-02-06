@@ -1,8 +1,8 @@
-# Démarrage rapide
+# Getting Started
 
-## Prérequis
+## Prerequisites
 
-- Go 1.21 ou supérieur
+- Go 1.21 or higher
 
 ## Installation
 
@@ -10,9 +10,9 @@
 go get github.com/edgeo-scada/modbus-tcp/modbus
 ```
 
-## Client Modbus
+## Modbus Client
 
-### Connexion basique
+### Basic Connection
 
 ```go
 package main
@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-    // Créer le client
+    // Create the client
     client, err := modbus.NewClient("192.168.1.100:502",
         modbus.WithUnitID(1),
         modbus.WithTimeout(5*time.Second),
@@ -37,7 +37,7 @@ func main() {
     }
     defer client.Close()
 
-    // Connexion
+    // Connect
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
@@ -45,21 +45,21 @@ func main() {
         log.Fatal(err)
     }
 
-    fmt.Println("Connecté!")
+    fmt.Println("Connected!")
 }
 ```
 
-### Lecture de registres
+### Reading Registers
 
 ```go
-// Lire 10 holding registers à partir de l'adresse 0
+// Read 10 holding registers starting from address 0
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
     log.Fatal(err)
 }
-fmt.Printf("Registres: %v\n", regs)
+fmt.Printf("Registers: %v\n", regs)
 
-// Lire 8 coils à partir de l'adresse 0
+// Read 8 coils starting from address 0
 coils, err := client.ReadCoils(ctx, 0, 8)
 if err != nil {
     log.Fatal(err)
@@ -67,31 +67,31 @@ if err != nil {
 fmt.Printf("Coils: %v\n", coils)
 ```
 
-### Écriture de registres
+### Writing Registers
 
 ```go
-// Écrire un registre
+// Write a single register
 err := client.WriteSingleRegister(ctx, 100, 1234)
 if err != nil {
     log.Fatal(err)
 }
 
-// Écrire plusieurs registres
+// Write multiple registers
 err = client.WriteMultipleRegisters(ctx, 100, []uint16{1111, 2222, 3333})
 if err != nil {
     log.Fatal(err)
 }
 
-// Écrire un coil
+// Write a coil
 err = client.WriteSingleCoil(ctx, 0, true)
 if err != nil {
     log.Fatal(err)
 }
 ```
 
-## Serveur Modbus
+## Modbus Server
 
-### Serveur avec MemoryHandler
+### Server with MemoryHandler
 
 ```go
 package main
@@ -107,19 +107,19 @@ import (
 )
 
 func main() {
-    // Créer un handler en mémoire
+    // Create a memory handler
     handler := modbus.NewMemoryHandler(65536, 65536)
 
-    // Initialiser des données
+    // Initialize some data
     handler.SetHoldingRegister(1, 0, 1234)
     handler.SetCoil(1, 0, true)
 
-    // Créer le serveur
+    // Create the server
     server := modbus.NewServer(handler,
         modbus.WithMaxConnections(100),
     )
 
-    // Gestion de l'arrêt gracieux
+    // Graceful shutdown handling
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
@@ -128,24 +128,24 @@ func main() {
 
     go func() {
         <-sigCh
-        fmt.Println("Arrêt...")
+        fmt.Println("Shutting down...")
         server.Close()
     }()
 
-    // Démarrer le serveur
-    fmt.Println("Serveur Modbus sur :502")
+    // Start the server
+    fmt.Println("Modbus server on :502")
     if err := server.ListenAndServeContext(ctx, ":502"); err != nil {
-        fmt.Printf("Erreur: %v\n", err)
+        fmt.Printf("Error: %v\n", err)
     }
 }
 ```
 
-## Pool de connexions
+## Connection Pool
 
-Pour les applications à haute performance:
+For high-performance applications:
 
 ```go
-// Créer un pool
+// Create a pool
 pool, err := modbus.NewPool("192.168.1.100:502",
     modbus.WithSize(10),
     modbus.WithMaxIdleTime(5*time.Minute),
@@ -158,7 +158,7 @@ if err != nil {
 }
 defer pool.Close()
 
-// Utiliser une connexion du pool
+// Get a connection from the pool
 client, err := pool.Get(ctx)
 if err != nil {
     log.Fatal(err)
@@ -167,18 +167,18 @@ if err != nil {
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 // ...
 
-// Remettre la connexion dans le pool
+// Return the connection to the pool
 pool.Put(client)
 ```
 
-Ou avec retour automatique:
+Or with automatic return:
 
 ```go
 pc, err := pool.GetPooled(ctx)
 if err != nil {
     log.Fatal(err)
 }
-defer pc.Close() // Remet automatiquement dans le pool
+defer pc.Close() // Automatically returns to the pool
 
 regs, err := pc.ReadHoldingRegisters(ctx, 0, 10)
 ```

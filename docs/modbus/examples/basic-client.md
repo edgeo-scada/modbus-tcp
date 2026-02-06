@@ -1,8 +1,8 @@
-# Exemple: Client Modbus
+# Example: Modbus Client
 
-Un exemple complet de client Modbus TCP démontrant les principales fonctionnalités.
+A complete example of a Modbus TCP client demonstrating the main features.
 
-## Code source
+## Source Code
 
 ```go
 package main
@@ -170,20 +170,20 @@ func main() {
 }
 ```
 
-## Exécution
+## Running
 
 ```bash
-# Avec le serveur par défaut sur localhost:502
+# With the default server on localhost:502
 go run main.go
 
-# Avec un serveur spécifique
+# With a specific server
 go run main.go -addr 192.168.1.100:502
 
-# Avec un Unit ID différent
+# With a different Unit ID
 go run main.go -addr 192.168.1.100:502 -unit 2
 ```
 
-## Sortie exemple
+## Example Output
 
 ```
 Connecting to localhost:502...

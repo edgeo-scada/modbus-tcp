@@ -8,7 +8,7 @@ slug: /
 [![Go](https://img.shields.io/badge/go-1.21+-00ADD8.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/edgeo-scada/modbus-tcp/blob/main/LICENSE)
 
-Une implémentation Go complète du protocole Modbus TCP, avec client, serveur et pool de connexions.
+A complete Go implementation of the Modbus TCP protocol, with client, server, and connection pool.
 
 ## Installation
 
@@ -16,7 +16,7 @@ Une implémentation Go complète du protocole Modbus TCP, avec client, serveur e
 go get github.com/edgeo-scada/modbus-tcp/modbus@v1.0.0
 ```
 
-Pour vérifier la version installée:
+To verify the installed version:
 
 ```go
 import "github.com/edgeo-scada/modbus-tcp/modbus"
@@ -27,32 +27,32 @@ func main() {
 }
 ```
 
-## Fonctionnalités
+## Features
 
-- **Client Modbus TCP** avec reconnexion automatique
-- **Serveur Modbus TCP** avec support multi-clients
-- **Pool de connexions** avec health checks
-- **Métriques** intégrées (latence, compteurs, histogrammes)
-- **Logging** structuré via `slog`
+- **Modbus TCP Client** with automatic reconnection
+- **Modbus TCP Server** with multi-client support
+- **Connection Pool** with health checks
+- **Built-in Metrics** (latency, counters, histograms)
+- **Structured Logging** via `slog`
 
-## Fonctions Modbus supportées
+## Supported Modbus Functions
 
-| Code | Fonction | Description |
+| Code | Function | Description |
 |------|----------|-------------|
-| FC01 | Read Coils | Lecture de bits de sortie |
-| FC02 | Read Discrete Inputs | Lecture d'entrées discrètes |
-| FC03 | Read Holding Registers | Lecture de registres de maintien |
-| FC04 | Read Input Registers | Lecture de registres d'entrée |
-| FC05 | Write Single Coil | Écriture d'un bit de sortie |
-| FC06 | Write Single Register | Écriture d'un registre |
-| FC07 | Read Exception Status | Lecture du statut d'exception |
-| FC08 | Diagnostics | Opérations de diagnostic |
-| FC11 | Get Comm Event Counter | Compteur d'événements |
-| FC15 | Write Multiple Coils | Écriture de plusieurs bits |
-| FC16 | Write Multiple Registers | Écriture de plusieurs registres |
-| FC17 | Report Server ID | Identification du serveur |
+| FC01 | Read Coils | Read output bits |
+| FC02 | Read Discrete Inputs | Read discrete inputs |
+| FC03 | Read Holding Registers | Read holding registers |
+| FC04 | Read Input Registers | Read input registers |
+| FC05 | Write Single Coil | Write a single output bit |
+| FC06 | Write Single Register | Write a single register |
+| FC07 | Read Exception Status | Read exception status |
+| FC08 | Diagnostics | Diagnostic operations |
+| FC11 | Get Comm Event Counter | Event counter |
+| FC15 | Write Multiple Coils | Write multiple bits |
+| FC16 | Write Multiple Registers | Write multiple registers |
+| FC17 | Report Server ID | Server identification |
 
-## Exemple rapide
+## Quick Example
 
 ```go
 package main
@@ -66,7 +66,7 @@ import (
 )
 
 func main() {
-    // Créer un client
+    // Create a client
     client, err := modbus.NewClient("localhost:502",
         modbus.WithTimeout(5*time.Second),
         modbus.WithAutoReconnect(true),
@@ -76,44 +76,44 @@ func main() {
     }
     defer client.Close()
 
-    // Connexion
+    // Connect
     ctx := context.Background()
     if err := client.Connect(ctx); err != nil {
         panic(err)
     }
 
-    // Lire des registres
+    // Read registers
     regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
     if err != nil {
         panic(err)
     }
-    fmt.Printf("Registres: %v\n", regs)
+    fmt.Printf("Registers: %v\n", regs)
 }
 ```
 
-## Structure du package
+## Package Structure
 
 ```
 modbus/
-├── client.go      # Client Modbus TCP
-├── server.go      # Serveur Modbus TCP
-├── pool.go        # Pool de connexions
-├── options.go     # Configuration fonctionnelle
-├── types.go       # Types et constantes
-├── errors.go      # Gestion des erreurs
-├── metrics.go     # Métriques et observabilité
-├── protocol.go    # Encodage/décodage du protocole
-├── functions.go   # Fonctions Modbus (PDU builders)
-└── version.go     # Informations de version
+├── client.go      # Modbus TCP Client
+├── server.go      # Modbus TCP Server
+├── pool.go        # Connection Pool
+├── options.go     # Functional Configuration
+├── types.go       # Types and Constants
+├── errors.go      # Error Handling
+├── metrics.go     # Metrics and Observability
+├── protocol.go    # Protocol Encoding/Decoding
+├── functions.go   # Modbus Functions (PDU builders)
+└── version.go     # Version Information
 ```
 
-## Prochaines étapes
+## Next Steps
 
-- [Démarrage rapide](./getting-started)
-- [Documentation Client](./client)
-- [Documentation Serveur](./server)
-- [Pool de connexions](./pool)
+- [Getting Started](./getting-started)
+- [Client Documentation](./client)
+- [Server Documentation](./server)
+- [Connection Pool](./pool)
 - [Configuration](./options)
-- [Gestion des erreurs](./errors)
-- [Métriques](./metrics)
+- [Error Handling](./errors)
+- [Metrics](./metrics)
 - [Changelog](./changelog)

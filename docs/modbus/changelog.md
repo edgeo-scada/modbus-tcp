@@ -1,63 +1,63 @@
 # Changelog
 
-Toutes les modifications notables de ce projet sont documentées dans ce fichier.
+All notable changes to this project are documented in this file.
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
-et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2024-02-01
 
-### Ajouté
+### Added
 
-- **Client Modbus TCP**
-  - Support de toutes les fonctions Modbus standard (FC01-FC17)
-  - Reconnexion automatique avec backoff exponentiel
-  - Configuration via options fonctionnelles
-  - Métriques intégrées (latence, compteurs)
-  - Logging structuré via `slog`
-  - Variantes `WithUnit` pour toutes les opérations
+- **Modbus TCP Client**
+  - Support for all standard Modbus functions (FC01-FC17)
+  - Automatic reconnection with exponential backoff
+  - Configuration via functional options
+  - Built-in metrics (latency, counters)
+  - Structured logging via `slog`
+  - `WithUnit` variants for all operations
 
-- **Serveur Modbus TCP**
-  - Support multi-clients concurrent
-  - `MemoryHandler` pour tests et simulations
-  - Interface `Handler` pour implémentations personnalisées
-  - Limite de connexions configurable
-  - Arrêt gracieux avec context
+- **Modbus TCP Server**
+  - Concurrent multi-client support
+  - `MemoryHandler` for testing and simulations
+  - `Handler` interface for custom implementations
+  - Configurable connection limit
+  - Graceful shutdown with context
 
-- **Pool de connexions**
-  - Réutilisation des connexions
-  - Health checks automatiques
-  - Gestion du temps d'inactivité
-  - `PooledClient` avec retour automatique
+- **Connection Pool**
+  - Connection reuse
+  - Automatic health checks
+  - Idle time management
+  - `PooledClient` with automatic return
 
-- **Métriques**
-  - Compteurs atomiques thread-safe
-  - Histogramme de latence avec buckets
-  - Métriques par code fonction
-  - Export compatible Prometheus/expvar
+- **Metrics**
+  - Thread-safe atomic counters
+  - Latency histogram with buckets
+  - Metrics by function code
+  - Prometheus/expvar compatible export
 
-- **Gestion des erreurs**
-  - Erreurs Modbus typées (`ModbusError`)
-  - Tous les codes d'exception standard
-  - Fonctions utilitaires (`IsException`, `IsIllegalDataAddress`, etc.)
+- **Error Handling**
+  - Typed Modbus errors (`ModbusError`)
+  - All standard exception codes
+  - Utility functions (`IsException`, `IsIllegalDataAddress`, etc.)
 
-### Sécurité
+### Security
 
-- Validation des entrées sur toutes les opérations
-- Protection contre les dépassements d'adresse
-- Timeouts configurables pour éviter les blocages
+- Input validation on all operations
+- Protection against address overflows
+- Configurable timeouts to prevent blocking
 
 ---
 
-## Convention de versioning
+## Versioning Convention
 
-Ce projet utilise le [Semantic Versioning](https://semver.org/lang/fr/):
+This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html):
 
-- **MAJOR** (X.0.0): Changements incompatibles avec les versions précédentes
-- **MINOR** (0.X.0): Nouvelles fonctionnalités rétrocompatibles
-- **PATCH** (0.0.X): Corrections de bugs rétrocompatibles
+- **MAJOR** (X.0.0): Backward-incompatible changes
+- **MINOR** (0.X.0): Backward-compatible new features
+- **PATCH** (0.0.X): Backward-compatible bug fixes
 
-### Accès à la version
+### Accessing the Version
 
 ```go
 import "github.com/edgeo-scada/modbus-tcp/modbus"
@@ -65,7 +65,16 @@ import "github.com/edgeo-scada/modbus-tcp/modbus"
 // Version string
 fmt.Println(modbus.Version) // "1.0.0"
 
-// Version détaillée
+// Detailed version
+info := modbus.GetVersion()
+fmt.Printf("v%d.%d.%d\n", info.Major, info.Minor, info.Patch)
+```
+a/modbus-tcp/modbus"
+
+// Version string
+fmt.Println(modbus.Version) // "1.0.0"
+
+// Detailed version
 info := modbus.GetVersion()
 fmt.Printf("v%d.%d.%d\n", info.Major, info.Minor, info.Patch)
 ```

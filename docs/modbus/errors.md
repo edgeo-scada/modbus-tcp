@@ -1,24 +1,24 @@
-# Gestion des erreurs
+# Error Handling
 
-## Erreurs standard
+## Standard Errors
 
-Le package définit plusieurs erreurs sentinelles:
+The package defines several sentinel errors:
 
-| Erreur | Description |
-|--------|-------------|
-| `ErrInvalidResponse` | Réponse malformée ou inattendue |
-| `ErrInvalidCRC` | Validation CRC échouée (mode RTU) |
-| `ErrInvalidFrame` | Trame malformée |
-| `ErrTimeout` | Timeout dépassé |
-| `ErrConnectionClosed` | Connexion fermée |
-| `ErrInvalidQuantity` | Quantité invalide (hors limites) |
-| `ErrInvalidAddress` | Adresse invalide |
-| `ErrPoolExhausted` | Pool de connexions épuisé |
-| `ErrPoolClosed` | Pool de connexions fermé |
-| `ErrNotConnected` | Client non connecté |
-| `ErrMaxRetriesExceeded` | Nombre max de tentatives dépassé |
+| Error | Description |
+|-------|-------------|
+| `ErrInvalidResponse` | Malformed or unexpected response |
+| `ErrInvalidCRC` | CRC validation failed (RTU mode) |
+| `ErrInvalidFrame` | Malformed frame |
+| `ErrTimeout` | Timeout exceeded |
+| `ErrConnectionClosed` | Connection closed |
+| `ErrInvalidQuantity` | Invalid quantity (out of bounds) |
+| `ErrInvalidAddress` | Invalid address |
+| `ErrPoolExhausted` | Connection pool exhausted |
+| `ErrPoolClosed` | Connection pool closed |
+| `ErrNotConnected` | Client not connected |
+| `ErrMaxRetriesExceeded` | Maximum retry count exceeded |
 
-### Vérification des erreurs
+### Error Checking
 
 ```go
 import "errors"
@@ -26,19 +26,19 @@ import "errors"
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
     if errors.Is(err, modbus.ErrNotConnected) {
-        // Reconnecter
+        // Reconnect
         client.Connect(ctx)
     } else if errors.Is(err, modbus.ErrTimeout) {
-        // Réessayer
+        // Retry
     } else if errors.Is(err, modbus.ErrMaxRetriesExceeded) {
-        // Abandon
+        // Give up
     }
 }
 ```
 
-## Erreurs Modbus (Exceptions)
+## Modbus Errors (Exceptions)
 
-Les erreurs du protocole Modbus sont représentées par `ModbusError`:
+Modbus protocol errors are represented by `ModbusError`:
 
 ```go
 type ModbusError struct {
@@ -47,75 +47,75 @@ type ModbusError struct {
 }
 ```
 
-### Codes d'exception
+### Exception Codes
 
-| Code | Constante | Description |
-|------|-----------|-------------|
-| 0x01 | `ExceptionIllegalFunction` | Fonction non supportée |
-| 0x02 | `ExceptionIllegalDataAddress` | Adresse invalide |
-| 0x03 | `ExceptionIllegalDataValue` | Valeur invalide |
-| 0x04 | `ExceptionServerDeviceFailure` | Erreur interne serveur |
-| 0x05 | `ExceptionAcknowledge` | Requête acceptée, traitement en cours |
-| 0x06 | `ExceptionServerDeviceBusy` | Serveur occupé |
-| 0x08 | `ExceptionMemoryParityError` | Erreur de parité mémoire |
-| 0x0A | `ExceptionGatewayPathUnavailable` | Passerelle indisponible |
-| 0x0B | `ExceptionGatewayTargetDeviceFailedToRespond` | Équipement cible ne répond pas |
+| Code | Constant | Description |
+|------|----------|-------------|
+| 0x01 | `ExceptionIllegalFunction` | Function not supported |
+| 0x02 | `ExceptionIllegalDataAddress` | Invalid address |
+| 0x03 | `ExceptionIllegalDataValue` | Invalid value |
+| 0x04 | `ExceptionServerDeviceFailure` | Internal server error |
+| 0x05 | `ExceptionAcknowledge` | Request accepted, processing in progress |
+| 0x06 | `ExceptionServerDeviceBusy` | Server busy |
+| 0x08 | `ExceptionMemoryParityError` | Memory parity error |
+| 0x0A | `ExceptionGatewayPathUnavailable` | Gateway unavailable |
+| 0x0B | `ExceptionGatewayTargetDeviceFailedToRespond` | Target device not responding |
 
-### Vérification des exceptions
+### Exception Checking
 
 ```go
 regs, err := client.ReadHoldingRegisters(ctx, 1000, 10)
 if err != nil {
-    // Vérifier si c'est une exception Modbus
+    // Check if it's a Modbus exception
     var modbusErr *modbus.ModbusError
     if errors.As(err, &modbusErr) {
         switch modbusErr.ExceptionCode {
         case modbus.ExceptionIllegalDataAddress:
-            log.Println("Adresse invalide")
+            log.Println("Invalid address")
         case modbus.ExceptionIllegalDataValue:
-            log.Println("Valeur invalide")
+            log.Println("Invalid value")
         case modbus.ExceptionServerDeviceBusy:
-            log.Println("Serveur occupé, réessayer plus tard")
+            log.Println("Server busy, retry later")
         default:
-            log.Printf("Exception Modbus: %v\n", modbusErr)
+            log.Printf("Modbus exception: %v\n", modbusErr)
         }
     }
 }
 ```
 
-### Fonctions utilitaires
+### Utility Functions
 
 ```go
-// Vérifier une exception spécifique
+// Check for a specific exception
 if modbus.IsException(err, modbus.ExceptionIllegalDataAddress) {
-    // Adresse invalide
+    // Invalid address
 }
 
-// Raccourcis pour les exceptions courantes
+// Shortcuts for common exceptions
 if modbus.IsIllegalFunction(err) {
-    // Fonction non supportée
+    // Function not supported
 }
 
 if modbus.IsIllegalDataAddress(err) {
-    // Adresse invalide
+    // Invalid address
 }
 
 if modbus.IsIllegalDataValue(err) {
-    // Valeur invalide
+    // Invalid value
 }
 
 if modbus.IsServerDeviceFailure(err) {
-    // Erreur serveur
+    // Server error
 }
 ```
 
-## Créer des erreurs Modbus (côté serveur)
+## Creating Modbus Errors (Server-side)
 
-Dans votre Handler, retournez des erreurs Modbus:
+In your Handler, return Modbus errors:
 
 ```go
 func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16) ([]uint16, error) {
-    // Vérifier l'adresse
+    // Check address
     if addr >= 10000 {
         return nil, modbus.NewModbusError(
             modbus.FuncReadHoldingRegisters,
@@ -123,7 +123,7 @@ func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16)
         )
     }
 
-    // Vérifier la quantité
+    // Check quantity
     if qty > 125 {
         return nil, modbus.NewModbusError(
             modbus.FuncReadHoldingRegisters,
@@ -131,7 +131,7 @@ func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16)
         )
     }
 
-    // Erreur interne
+    // Internal error
     values, err := h.db.Query(...)
     if err != nil {
         return nil, modbus.NewModbusError(
@@ -144,30 +144,30 @@ func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16)
 }
 ```
 
-## Erreurs de connexion
+## Connection Errors
 
-### Gestion avec reconnexion automatique
+### Handling with Automatic Reconnection
 
 ```go
 client, _ := modbus.NewClient("localhost:502",
     modbus.WithAutoReconnect(true),
     modbus.WithMaxRetries(5),
     modbus.WithOnDisconnect(func(err error) {
-        log.Printf("Déconnexion: %v\n", err)
+        log.Printf("Disconnection: %v\n", err)
     }),
 )
 
-// Les erreurs réseau sont automatiquement gérées avec retry
+// Network errors are automatically handled with retry
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
-    // Après 5 tentatives échouées
+    // After 5 failed attempts
     if errors.Is(err, modbus.ErrMaxRetriesExceeded) {
-        log.Fatal("Impossible de joindre le serveur")
+        log.Fatal("Unable to reach the server")
     }
 }
 ```
 
-### Gestion manuelle
+### Manual Handling
 
 ```go
 client, _ := modbus.NewClient("localhost:502",
@@ -177,25 +177,25 @@ client, _ := modbus.NewClient("localhost:502",
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
     if errors.Is(err, modbus.ErrNotConnected) {
-        // Reconnexion manuelle
+        // Manual reconnection
         if err := client.Connect(ctx); err != nil {
             log.Fatal(err)
         }
-        // Réessayer
+        // Retry
         regs, err = client.ReadHoldingRegisters(ctx, 0, 10)
     }
 }
 ```
 
-## Bonnes pratiques
+## Best Practices
 
-1. **Toujours vérifier les erreurs** - Ne jamais ignorer les erreurs retournées
+1. **Always check errors** - Never ignore returned errors
 
-2. **Distinguer les types d'erreurs** - Les erreurs Modbus (protocol) vs erreurs réseau
+2. **Distinguish error types** - Modbus errors (protocol) vs network errors
 
-3. **Logger les erreurs** - Pour le debugging et monitoring
+3. **Log errors** - For debugging and monitoring
 
-4. **Utiliser les timeouts** - Éviter les blocages indéfinis
+4. **Use timeouts** - Avoid indefinite blocking
 
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -204,7 +204,7 @@ defer cancel()
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
     if errors.Is(err, context.DeadlineExceeded) {
-        log.Println("Timeout - le serveur ne répond pas")
+        log.Println("Timeout - the server is not responding")
     }
 }
 ```

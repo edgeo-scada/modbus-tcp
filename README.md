@@ -12,7 +12,7 @@ A comprehensive Modbus TCP client library and CLI tool written in Go.
 - Thread-safe client with automatic reconnection
 - Clean API with context support
 
-### CLI (`modbuscli`)
+### CLI (`edgeo-modbus`)
 
 - Read/write coils and registers
 - Multiple output formats (table, JSON, CSV, hex, raw)
@@ -43,31 +43,31 @@ go get github.com/edgeo-scada/modbus-tcp/modbus
 
 ```bash
 # Read 10 holding registers from address 0
-modbuscli read hr -a 0 -c 10 -H 192.168.1.100
+edgeo-modbus read hr -a 0 -c 10 -H 192.168.1.100
 
 # Read coils
-modbuscli read coils -a 0 -c 16 -H 192.168.1.100
+edgeo-modbus read coils -a 0 -c 16 -H 192.168.1.100
 
 # Write a single register
-modbuscli write register -a 100 -v 1234 -H 192.168.1.100
+edgeo-modbus write register -a 100 -v 1234 -H 192.168.1.100
 
 # Write a coil (ON)
-modbuscli write coil -a 0 -v true -H 192.168.1.100
+edgeo-modbus write coil -a 0 -v true -H 192.168.1.100
 
 # Get device information
-modbuscli info -H 192.168.1.100
+edgeo-modbus info -H 192.168.1.100
 
 # Scan for devices on a network
-modbuscli scan -H 192.168.1.0/24
+edgeo-modbus scan -H 192.168.1.0/24
 
 # Watch registers continuously (1 second interval)
-modbuscli watch hr -a 0 -c 5 -i 1s -H 192.168.1.100
+edgeo-modbus watch hr -a 0 -c 5 -i 1s -H 192.168.1.100
 
 # Dump registers to CSV
-modbuscli dump hr -a 0 -e 999 -f registers.csv -H 192.168.1.100
+edgeo-modbus dump hr -a 0 -e 999 -f registers.csv -H 192.168.1.100
 
 # Interactive mode
-modbuscli interactive -H 192.168.1.100
+edgeo-modbus interactive -H 192.168.1.100
 ```
 
 ### Library Usage
@@ -145,7 +145,7 @@ func main() {
 | `--no-color` | | Disable color output | `false` |
 | `--byte-order` | | Byte order: big, little | `big` |
 | `--word-order` | | Word order for 32-bit values | `big` |
-| `--config` | | Config file path | `$HOME/.modbuscli.yaml` |
+| `--config` | | Config file path | `$HOME/.edgeo-modbus.yaml` |
 
 ### Commands
 
@@ -153,17 +153,17 @@ func main() {
 
 ```bash
 # Read coils (FC01)
-modbuscli read coils -a <address> -c <count>
+edgeo-modbus read coils -a <address> -c <count>
 
 # Read discrete inputs (FC02)
-modbuscli read discrete-inputs -a <address> -c <count>
+edgeo-modbus read discrete-inputs -a <address> -c <count>
 
 # Read holding registers (FC03)
-modbuscli read holding-registers -a <address> -c <count>
+edgeo-modbus read holding-registers -a <address> -c <count>
 # Aliases: hr, holding
 
 # Read input registers (FC04)
-modbuscli read input-registers -a <address> -c <count>
+edgeo-modbus read input-registers -a <address> -c <count>
 # Aliases: ir, input
 ```
 
@@ -171,99 +171,99 @@ modbuscli read input-registers -a <address> -c <count>
 
 ```bash
 # Write single coil (FC05)
-modbuscli write coil -a <address> -v <true|false|1|0>
+edgeo-modbus write coil -a <address> -v <true|false|1|0>
 
 # Write multiple coils (FC15)
-modbuscli write coils -a <address> -v <1,0,1,1,0>
+edgeo-modbus write coils -a <address> -v <1,0,1,1,0>
 
 # Write single register (FC06)
-modbuscli write register -a <address> -v <value>
+edgeo-modbus write register -a <address> -v <value>
 
 # Write multiple registers (FC16)
-modbuscli write registers -a <address> -v <val1,val2,val3>
+edgeo-modbus write registers -a <address> -v <val1,val2,val3>
 ```
 
 #### Scan Command
 
 ```bash
 # Scan a single host for responding unit IDs
-modbuscli scan -H 192.168.1.100
+edgeo-modbus scan -H 192.168.1.100
 
 # Scan a network range
-modbuscli scan -H 192.168.1.0/24
+edgeo-modbus scan -H 192.168.1.0/24
 
 # Scan specific unit ID range
-modbuscli scan -H 192.168.1.100 --unit-start 1 --unit-end 10
+edgeo-modbus scan -H 192.168.1.100 --unit-start 1 --unit-end 10
 
 # Scan with custom concurrency
-modbuscli scan -H 192.168.1.0/24 --concurrency 50
+edgeo-modbus scan -H 192.168.1.0/24 --concurrency 50
 ```
 
 #### Watch Command
 
 ```bash
 # Watch holding registers every second
-modbuscli watch hr -a 0 -c 10 -i 1s -H 192.168.1.100
+edgeo-modbus watch hr -a 0 -c 10 -i 1s -H 192.168.1.100
 
 # Watch with change detection only
-modbuscli watch hr -a 0 -c 10 --changes-only -H 192.168.1.100
+edgeo-modbus watch hr -a 0 -c 10 --changes-only -H 192.168.1.100
 
 # Watch with threshold alerts
-modbuscli watch hr -a 0 -c 1 --alert-above 100 --alert-below 10 -H 192.168.1.100
+edgeo-modbus watch hr -a 0 -c 1 --alert-above 100 --alert-below 10 -H 192.168.1.100
 
 # Watch coils
-modbuscli watch coils -a 0 -c 16 -i 500ms -H 192.168.1.100
+edgeo-modbus watch coils -a 0 -c 16 -i 500ms -H 192.168.1.100
 ```
 
 #### Dump Command
 
 ```bash
 # Dump holding registers to stdout
-modbuscli dump hr -a 0 -e 999 -H 192.168.1.100
+edgeo-modbus dump hr -a 0 -e 999 -H 192.168.1.100
 
 # Dump to CSV file
-modbuscli dump hr -a 0 -e 999 -f output.csv -H 192.168.1.100
+edgeo-modbus dump hr -a 0 -e 999 -f output.csv -H 192.168.1.100
 
 # Dump as JSON
-modbuscli dump hr -a 0 -e 999 -o json -H 192.168.1.100
+edgeo-modbus dump hr -a 0 -e 999 -o json -H 192.168.1.100
 
 # Dump as hexdump
-modbuscli dump hr -a 0 -e 999 -o hex -H 192.168.1.100
+edgeo-modbus dump hr -a 0 -e 999 -o hex -H 192.168.1.100
 
 # Dump coils
-modbuscli dump coils -a 0 -e 1000 -H 192.168.1.100
+edgeo-modbus dump coils -a 0 -e 1000 -H 192.168.1.100
 ```
 
 #### Info Command
 
 ```bash
 # Probe device and show capabilities
-modbuscli info -H 192.168.1.100
+edgeo-modbus info -H 192.168.1.100
 
 # JSON output
-modbuscli info -H 192.168.1.100 -o json
+edgeo-modbus info -H 192.168.1.100 -o json
 ```
 
 #### Diagnostic Commands
 
 ```bash
 # Read exception status (FC07)
-modbuscli diag exception -H 192.168.1.100
+edgeo-modbus diag exception -H 192.168.1.100
 
 # Run diagnostics (FC08)
-modbuscli diag run --sub 0 -H 192.168.1.100
+edgeo-modbus diag run --sub 0 -H 192.168.1.100
 
 # Get comm event counter (FC11)
-modbuscli diag counter -H 192.168.1.100
+edgeo-modbus diag counter -H 192.168.1.100
 
 # Report server ID (FC17)
-modbuscli diag server-id -H 192.168.1.100
+edgeo-modbus diag server-id -H 192.168.1.100
 ```
 
 #### Interactive Mode
 
 ```bash
-modbuscli interactive -H 192.168.1.100
+edgeo-modbus interactive -H 192.168.1.100
 ```
 
 Available commands in interactive mode:
@@ -277,7 +277,7 @@ Available commands in interactive mode:
 
 ## Configuration File
 
-Create `~/.modbuscli.yaml`:
+Create `~/.edgeo-modbus.yaml`:
 
 ```yaml
 host: 192.168.1.100
@@ -313,7 +313,7 @@ word-order: big
 ```
 .
 ├── cmd/
-│   └── modbuscli/          # CLI application
+│   └── edgeo-modbus/       # CLI application
 │       ├── main.go
 │       ├── root.go         # Root command and global flags
 │       ├── read.go         # Read commands
@@ -346,10 +346,13 @@ git clone https://github.com/edgeo-scada/modbus-tcp.git
 cd modbus-tcp
 
 # Build the CLI
-go build -o modbuscli ./cmd/modbuscli
+make build
+
+# Build for all platforms
+make build-all
 
 # Run tests
-go test ./...
+make test
 ```
 
 ## License

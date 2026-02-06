@@ -1,36 +1,36 @@
-# Serveur Modbus TCP
+# Modbus TCP Server
 
-Le serveur Modbus TCP permet de simuler un équipement Modbus ou de créer une passerelle.
+The Modbus TCP server allows you to simulate a Modbus device or create a gateway.
 
-## Création
+## Creation
 
 ```go
 server := modbus.NewServer(handler Handler, opts ...ServerOption) *Server
 ```
 
-**Paramètres:**
-- `handler`: Implémentation de l'interface `Handler`
-- `opts`: Options de configuration
+**Parameters:**
+- `handler`: Implementation of the `Handler` interface
+- `opts`: Configuration options
 
-## Interface Handler
+## Handler Interface
 
-Pour créer un serveur, vous devez implémenter l'interface `Handler`:
+To create a server, you must implement the `Handler` interface:
 
 ```go
 type Handler interface {
-    // Opérations sur les coils
+    // Coil operations
     ReadCoils(unitID UnitID, addr, qty uint16) ([]bool, error)
     ReadDiscreteInputs(unitID UnitID, addr, qty uint16) ([]bool, error)
     WriteSingleCoil(unitID UnitID, addr uint16, value bool) error
     WriteMultipleCoils(unitID UnitID, addr uint16, values []bool) error
 
-    // Opérations sur les registres
+    // Register operations
     ReadHoldingRegisters(unitID UnitID, addr, qty uint16) ([]uint16, error)
     ReadInputRegisters(unitID UnitID, addr, qty uint16) ([]uint16, error)
     WriteSingleRegister(unitID UnitID, addr, value uint16) error
     WriteMultipleRegisters(unitID UnitID, addr uint16, values []uint16) error
 
-    // Opérations de diagnostic
+    // Diagnostic operations
     ReadExceptionStatus(unitID UnitID) (uint8, error)
     Diagnostics(unitID UnitID, subFunc uint16, data []byte) ([]byte, error)
     GetCommEventCounter(unitID UnitID) (status uint16, eventCount uint16, err error)
@@ -40,13 +40,13 @@ type Handler interface {
 
 ## MemoryHandler
 
-Un handler en mémoire est fourni pour les tests et simulations:
+A memory handler is provided for testing and simulations:
 
 ```go
 handler := modbus.NewMemoryHandler(coilSize, registerSize int)
 ```
 
-### Initialisation des données
+### Data Initialization
 
 ```go
 handler := modbus.NewMemoryHandler(65536, 65536)
@@ -67,10 +67,10 @@ handler.SetHoldingRegister(unitID, 1, 5678)
 handler.SetInputRegister(unitID, 0, 100)
 
 // Server ID
-handler.SetServerID([]byte("Mon Serveur Modbus v1.0"))
+handler.SetServerID([]byte("My Modbus Server v1.0"))
 ```
 
-## Démarrage du serveur
+## Starting the Server
 
 ### ListenAndServe
 
@@ -87,7 +87,7 @@ if err := server.ListenAndServe(":502"); err != nil {
 
 ### ListenAndServeContext
 
-Avec support d'annulation via context:
+With context cancellation support:
 
 ```go
 func (s *Server) ListenAndServeContext(ctx context.Context, addr string) error
@@ -97,7 +97,7 @@ func (s *Server) ListenAndServeContext(ctx context.Context, addr string) error
 ctx, cancel := context.WithCancel(context.Background())
 defer cancel()
 
-// Arrêt gracieux sur signal
+// Graceful shutdown on signal
 go func() {
     sigCh := make(chan os.Signal, 1)
     signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
@@ -110,7 +110,7 @@ server.ListenAndServeContext(ctx, ":502")
 
 ### Serve
 
-Avec un listener personnalisé:
+With a custom listener:
 
 ```go
 func (s *Server) Serve(listener net.Listener) error
@@ -124,57 +124,57 @@ if err != nil {
 server.Serve(listener)
 ```
 
-## Arrêt du serveur
+## Stopping the Server
 
 ```go
 func (s *Server) Close() error
 ```
 
-Ferme proprement toutes les connexions actives.
+Properly closes all active connections.
 
-## Informations sur le serveur
+## Server Information
 
 ```go
-// Adresse du serveur
+// Server address
 addr := server.Addr()
 
-// Nombre de connexions actives
+// Number of active connections
 count := server.ActiveConnections()
 ```
 
-## Options du serveur
+## Server Options
 
 ```go
 server := modbus.NewServer(handler,
-    modbus.WithServerLogger(logger),      // Logger personnalisé
-    modbus.WithMaxConnections(100),       // Max connexions simultanées
-    modbus.WithReadTimeout(30*time.Second), // Timeout de lecture
+    modbus.WithServerLogger(logger),      // Custom logger
+    modbus.WithMaxConnections(100),       // Max simultaneous connections
+    modbus.WithReadTimeout(30*time.Second), // Read timeout
 )
 ```
 
-Voir [Options](./options.md) pour la liste complète.
+See [Options](./options.md) for the complete list.
 
-## Métriques serveur
+## Server Metrics
 
 ```go
 type ServerMetrics struct {
-    RequestsTotal   Counter  // Total des requêtes reçues
-    RequestsSuccess Counter  // Requêtes traitées avec succès
-    RequestsErrors  Counter  // Requêtes en erreur
-    ActiveConns     Counter  // Connexions actives
-    TotalConns      Counter  // Total des connexions reçues
+    RequestsTotal   Counter  // Total requests received
+    RequestsSuccess Counter  // Successfully processed requests
+    RequestsErrors  Counter  // Failed requests
+    ActiveConns     Counter  // Active connections
+    TotalConns      Counter  // Total connections received
 }
 ```
 
 ```go
 metrics := server.Metrics()
-fmt.Printf("Connexions actives: %d\n", metrics.ActiveConns.Value())
-fmt.Printf("Total requêtes: %d\n", metrics.RequestsTotal.Value())
+fmt.Printf("Active connections: %d\n", metrics.ActiveConns.Value())
+fmt.Printf("Total requests: %d\n", metrics.RequestsTotal.Value())
 ```
 
-## Handler personnalisé
+## Custom Handler
 
-Exemple d'un handler personnalisé qui connecte à une base de données:
+Example of a custom handler that connects to a database:
 
 ```go
 type DBHandler struct {
@@ -182,7 +182,7 @@ type DBHandler struct {
 }
 
 func (h *DBHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16) ([]uint16, error) {
-    // Lire depuis la base de données
+    // Read from database
     rows, err := h.db.Query("SELECT value FROM registers WHERE unit_id = ? AND addr >= ? AND addr < ?",
         unitID, addr, addr+qty)
     if err != nil {
@@ -191,7 +191,7 @@ func (h *DBHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16)
     defer rows.Close()
 
     values := make([]uint16, qty)
-    // ... remplir values
+    // ... populate values
     return values, nil
 }
 
@@ -204,12 +204,12 @@ func (h *DBHandler) WriteSingleRegister(unitID modbus.UnitID, addr, value uint16
     return nil
 }
 
-// Implémenter les autres méthodes...
+// Implement other methods...
 ```
 
-## Retourner des erreurs Modbus
+## Returning Modbus Errors
 
-Utilisez `NewModbusError` pour retourner des exceptions Modbus standard:
+Use `NewModbusError` to return standard Modbus exceptions:
 
 ```go
 func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16) ([]uint16, error) {
@@ -223,7 +223,7 @@ func (h *MyHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16)
 }
 ```
 
-Exceptions disponibles:
+Available exceptions:
 - `ExceptionIllegalFunction` (0x01)
 - `ExceptionIllegalDataAddress` (0x02)
 - `ExceptionIllegalDataValue` (0x03)

@@ -1,12 +1,12 @@
 # Configuration
 
-La configuration utilise le pattern des options fonctionnelles (functional options).
+Configuration uses the functional options pattern.
 
-## Options Client
+## Client Options
 
 ### WithUnitID
 
-Définit l'Unit ID par défaut pour les requêtes.
+Sets the default Unit ID for requests.
 
 ```go
 modbus.WithUnitID(id UnitID)
@@ -18,11 +18,11 @@ client, _ := modbus.NewClient("localhost:502",
 )
 ```
 
-L'Unit ID identifie l'équipement cible sur le réseau Modbus. Valeurs: 1-247.
+The Unit ID identifies the target device on the Modbus network. Values: 1-247.
 
 ### WithTimeout
 
-Définit le timeout pour les opérations.
+Sets the timeout for operations.
 
 ```go
 modbus.WithTimeout(d time.Duration)
@@ -34,11 +34,11 @@ client, _ := modbus.NewClient("localhost:502",
 )
 ```
 
-**Défaut:** 5 secondes
+**Default:** 5 seconds
 
 ### WithAutoReconnect
 
-Active la reconnexion automatique en cas de perte de connexion.
+Enables automatic reconnection on connection loss.
 
 ```go
 modbus.WithAutoReconnect(enable bool)
@@ -50,33 +50,33 @@ client, _ := modbus.NewClient("localhost:502",
 )
 ```
 
-**Défaut:** false
+**Default:** false
 
 ### WithReconnectBackoff
 
-Définit le délai initial entre les tentatives de reconnexion.
+Sets the initial delay between reconnection attempts.
 
 ```go
 modbus.WithReconnectBackoff(d time.Duration)
 ```
 
-Le backoff augmente exponentiellement jusqu'à `MaxReconnectTime`.
+The backoff increases exponentially up to `MaxReconnectTime`.
 
-**Défaut:** 1 seconde
+**Default:** 1 second
 
 ### WithMaxReconnectTime
 
-Définit le délai maximum entre les tentatives de reconnexion.
+Sets the maximum delay between reconnection attempts.
 
 ```go
 modbus.WithMaxReconnectTime(d time.Duration)
 ```
 
-**Défaut:** 30 secondes
+**Default:** 30 seconds
 
 ### WithMaxRetries
 
-Définit le nombre maximum de tentatives pour une requête.
+Sets the maximum number of attempts for a request.
 
 ```go
 modbus.WithMaxRetries(n int)
@@ -89,11 +89,11 @@ client, _ := modbus.NewClient("localhost:502",
 )
 ```
 
-**Défaut:** 3
+**Default:** 3
 
 ### WithOnConnect
 
-Définit un callback appelé lors de la connexion.
+Sets a callback called on connection.
 
 ```go
 modbus.WithOnConnect(fn func())
@@ -102,14 +102,14 @@ modbus.WithOnConnect(fn func())
 ```go
 client, _ := modbus.NewClient("localhost:502",
     modbus.WithOnConnect(func() {
-        log.Println("Connecté!")
+        log.Println("Connected!")
     }),
 )
 ```
 
 ### WithOnDisconnect
 
-Définit un callback appelé lors de la déconnexion.
+Sets a callback called on disconnection.
 
 ```go
 modbus.WithOnDisconnect(fn func(error))
@@ -118,14 +118,14 @@ modbus.WithOnDisconnect(fn func(error))
 ```go
 client, _ := modbus.NewClient("localhost:502",
     modbus.WithOnDisconnect(func(err error) {
-        log.Printf("Déconnecté: %v\n", err)
+        log.Printf("Disconnected: %v\n", err)
     }),
 )
 ```
 
 ### WithLogger
 
-Définit le logger pour le client.
+Sets the logger for the client.
 
 ```go
 modbus.WithLogger(logger *slog.Logger)
@@ -141,13 +141,13 @@ client, _ := modbus.NewClient("localhost:502",
 )
 ```
 
-**Défaut:** `slog.Default()`
+**Default:** `slog.Default()`
 
-## Options Serveur
+## Server Options
 
 ### WithServerLogger
 
-Définit le logger pour le serveur.
+Sets the logger for the server.
 
 ```go
 modbus.WithServerLogger(logger *slog.Logger)
@@ -155,7 +155,7 @@ modbus.WithServerLogger(logger *slog.Logger)
 
 ### WithMaxConnections
 
-Définit le nombre maximum de connexions simultanées.
+Sets the maximum number of simultaneous connections.
 
 ```go
 modbus.WithMaxConnections(n int)
@@ -167,25 +167,25 @@ server := modbus.NewServer(handler,
 )
 ```
 
-**Défaut:** 100
+**Default:** 100
 
 ### WithReadTimeout
 
-Définit le timeout de lecture pour les connexions client.
+Sets the read timeout for client connections.
 
 ```go
 modbus.WithReadTimeout(d time.Duration)
 ```
 
-Les connexions inactives plus longtemps que ce timeout sont fermées.
+Connections inactive longer than this timeout are closed.
 
-**Défaut:** 30 secondes
+**Default:** 30 seconds
 
-## Options Pool
+## Pool Options
 
 ### WithSize
 
-Définit la taille maximale du pool.
+Sets the maximum pool size.
 
 ```go
 modbus.WithSize(size int)
@@ -197,11 +197,11 @@ pool, _ := modbus.NewPool("localhost:502",
 )
 ```
 
-**Défaut:** 5
+**Default:** 5
 
 ### WithMaxIdleTime
 
-Définit la durée maximale d'inactivité avant fermeture d'une connexion.
+Sets the maximum idle time before closing a connection.
 
 ```go
 modbus.WithMaxIdleTime(d time.Duration)
@@ -213,11 +213,11 @@ pool, _ := modbus.NewPool("localhost:502",
 )
 ```
 
-**Défaut:** 5 minutes
+**Default:** 5 minutes
 
 ### WithHealthCheckFrequency
 
-Définit la fréquence des vérifications de santé des connexions.
+Sets the frequency of connection health checks.
 
 ```go
 modbus.WithHealthCheckFrequency(d time.Duration)
@@ -229,11 +229,11 @@ pool, _ := modbus.NewPool("localhost:502",
 )
 ```
 
-**Défaut:** 1 minute. Mettre à 0 pour désactiver.
+**Default:** 1 minute. Set to 0 to disable.
 
 ### WithClientOptions
 
-Définit les options à utiliser pour créer les clients du pool.
+Sets options to use when creating pool clients.
 
 ```go
 modbus.WithClientOptions(opts ...Option)
@@ -249,7 +249,7 @@ pool, _ := modbus.NewPool("localhost:502",
 )
 ```
 
-## Exemple complet
+## Complete Example
 
 ```go
 package main
@@ -263,12 +263,12 @@ import (
 )
 
 func main() {
-    // Logger personnalisé
+    // Custom logger
     logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
         Level: slog.LevelInfo,
     }))
 
-    // Client avec toutes les options
+    // Client with all options
     client, _ := modbus.NewClient("192.168.1.100:502",
         // Identification
         modbus.WithUnitID(1),
@@ -276,7 +276,7 @@ func main() {
         // Timeouts
         modbus.WithTimeout(5*time.Second),
 
-        // Reconnexion
+        // Reconnection
         modbus.WithAutoReconnect(true),
         modbus.WithReconnectBackoff(500*time.Millisecond),
         modbus.WithMaxReconnectTime(30*time.Second),

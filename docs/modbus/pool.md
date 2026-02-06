@@ -1,16 +1,16 @@
-# Pool de connexions
+# Connection Pool
 
-Le pool de connexions permet de réutiliser des connexions Modbus pour de meilleures performances.
+The connection pool allows reusing Modbus connections for better performance.
 
-## Création
+## Creation
 
 ```go
 pool, err := modbus.NewPool(addr string, opts ...PoolOption) (*Pool, error)
 ```
 
-**Paramètres:**
-- `addr`: Adresse du serveur Modbus
-- `opts`: Options de configuration du pool
+**Parameters:**
+- `addr`: Modbus server address
+- `opts`: Pool configuration options
 
 ```go
 pool, err := modbus.NewPool("192.168.1.100:502",
@@ -28,25 +28,25 @@ if err != nil {
 defer pool.Close()
 ```
 
-## Utilisation manuelle
+## Manual Usage
 
 ### Get / Put
 
 ```go
-// Obtenir une connexion
+// Get a connection
 client, err := pool.Get(ctx)
 if err != nil {
     log.Fatal(err)
 }
 
-// Utiliser la connexion
+// Use the connection
 regs, err := client.ReadHoldingRegisters(ctx, 0, 10)
 
-// IMPORTANT: Toujours remettre la connexion dans le pool
+// IMPORTANT: Always return the connection to the pool
 pool.Put(client)
 ```
 
-### Pattern recommandé
+### Recommended Pattern
 
 ```go
 func readRegisters(ctx context.Context, pool *modbus.Pool) ([]uint16, error) {
@@ -60,25 +60,25 @@ func readRegisters(ctx context.Context, pool *modbus.Pool) ([]uint16, error) {
 }
 ```
 
-## Utilisation avec retour automatique
+## Automatic Return Usage
 
 ### GetPooled
 
-La méthode `GetPooled` retourne un wrapper qui remet automatiquement la connexion dans le pool lors de l'appel à `Close()`:
+The `GetPooled` method returns a wrapper that automatically returns the connection to the pool when `Close()` is called:
 
 ```go
 pc, err := pool.GetPooled(ctx)
 if err != nil {
     log.Fatal(err)
 }
-defer pc.Close()  // Remet automatiquement dans le pool
+defer pc.Close()  // Automatically returns to the pool
 
 regs, err := pc.ReadHoldingRegisters(ctx, 0, 10)
 ```
 
 ### Discard
 
-Si la connexion est dans un état invalide, utilisez `Discard()` au lieu de `Close()`:
+If the connection is in an invalid state, use `Discard()` instead of `Close()`:
 
 ```go
 pc, err := pool.GetPooled(ctx)
@@ -88,100 +88,100 @@ if err != nil {
 
 regs, err := pc.ReadHoldingRegisters(ctx, 0, 10)
 if err != nil {
-    pc.Discard()  // Ne remet pas dans le pool, ferme définitivement
+    pc.Discard()  // Does not return to the pool, closes permanently
     return nil, err
 }
 
-pc.Close()  // Remet dans le pool
+pc.Close()  // Returns to the pool
 return regs, nil
 ```
 
-## Options du pool
+## Pool Options
 
-| Option | Description | Défaut |
-|--------|-------------|--------|
-| `WithSize(n)` | Taille maximale du pool | 5 |
-| `WithMaxIdleTime(d)` | Durée max d'inactivité avant fermeture | 5 min |
-| `WithHealthCheckFrequency(d)` | Fréquence des vérifications de santé | 1 min |
-| `WithClientOptions(opts...)` | Options pour les clients créés | - |
+| Option | Description | Default |
+|--------|-------------|---------|
+| `WithSize(n)` | Maximum pool size | 5 |
+| `WithMaxIdleTime(d)` | Max idle time before closing | 5 min |
+| `WithHealthCheckFrequency(d)` | Health check frequency | 1 min |
+| `WithClientOptions(opts...)` | Options for created clients | - |
 
 ```go
 pool, _ := modbus.NewPool("localhost:502",
-    modbus.WithSize(20),                           // 20 connexions max
-    modbus.WithMaxIdleTime(10*time.Minute),        // Ferme après 10min d'inactivité
-    modbus.WithHealthCheckFrequency(30*time.Second), // Vérifie toutes les 30s
+    modbus.WithSize(20),                           // 20 max connections
+    modbus.WithMaxIdleTime(10*time.Minute),        // Close after 10min of inactivity
+    modbus.WithHealthCheckFrequency(30*time.Second), // Check every 30s
     modbus.WithClientOptions(
         modbus.WithTimeout(3*time.Second),
-        modbus.WithAutoReconnect(false),  // Le pool gère la reconnexion
+        modbus.WithAutoReconnect(false),  // Pool handles reconnection
     ),
 )
 ```
 
-## Statistiques
+## Statistics
 
 ```go
 stats := pool.Stats()
-fmt.Printf("Taille du pool: %d\n", stats.Size)
-fmt.Printf("Connexions créées: %d\n", stats.Created)
-fmt.Printf("Connexions disponibles: %d\n", stats.Available)
-fmt.Printf("Get total: %d\n", stats.Gets)
-fmt.Printf("Put total: %d\n", stats.Puts)
-fmt.Printf("Hits (réutilisation): %d\n", stats.Hits)
-fmt.Printf("Misses (nouvelle connexion): %d\n", stats.Misses)
+fmt.Printf("Pool size: %d\n", stats.Size)
+fmt.Printf("Connections created: %d\n", stats.Created)
+fmt.Printf("Available connections: %d\n", stats.Available)
+fmt.Printf("Total gets: %d\n", stats.Gets)
+fmt.Printf("Total puts: %d\n", stats.Puts)
+fmt.Printf("Hits (reuse): %d\n", stats.Hits)
+fmt.Printf("Misses (new connection): %d\n", stats.Misses)
 fmt.Printf("Timeouts: %d\n", stats.Timeouts)
 ```
 
-## Métriques
+## Metrics
 
 ```go
 type PoolMetrics struct {
-    Gets      Counter  // Nombre d'appels à Get
-    Puts      Counter  // Nombre d'appels à Put
-    Hits      Counter  // Connexions réutilisées
-    Misses    Counter  // Nouvelles connexions créées
-    Timeouts  Counter  // Timeouts lors de Get
-    Created   Counter  // Total connexions créées
-    Closed    Counter  // Total connexions fermées
-    Available Counter  // Connexions disponibles actuellement
+    Gets      Counter  // Number of Get calls
+    Puts      Counter  // Number of Put calls
+    Hits      Counter  // Reused connections
+    Misses    Counter  // New connections created
+    Timeouts  Counter  // Timeouts during Get
+    Created   Counter  // Total connections created
+    Closed    Counter  // Total connections closed
+    Available Counter  // Currently available connections
 }
 ```
 
 ```go
 metrics := pool.Metrics()
 hitRate := float64(metrics.Hits.Value()) / float64(metrics.Gets.Value()) * 100
-fmt.Printf("Taux de réutilisation: %.1f%%\n", hitRate)
+fmt.Printf("Reuse rate: %.1f%%\n", hitRate)
 ```
 
-## Fermeture
+## Closing
 
 ```go
 err := pool.Close()
 ```
 
-La fermeture:
-1. Arrête le health checker
-2. Ferme toutes les connexions actives
-3. Attend la fin des goroutines
+Closing:
+1. Stops the health checker
+2. Closes all active connections
+3. Waits for goroutines to finish
 
-## Comportement du pool
+## Pool Behavior
 
-### Obtention d'une connexion
+### Getting a Connection
 
-1. Tente d'obtenir une connexion disponible du pool
-2. Vérifie que la connexion est valide (connectée, pas trop vieille)
-3. Si aucune connexion disponible et `created < size`, crée une nouvelle connexion
-4. Sinon, attend qu'une connexion se libère ou que le context expire
+1. Attempts to get an available connection from the pool
+2. Verifies the connection is valid (connected, not too old)
+3. If no connection available and `created < size`, creates a new connection
+4. Otherwise, waits for a connection to become available or for context to expire
 
-### Retour d'une connexion
+### Returning a Connection
 
-1. Vérifie que la connexion est toujours connectée
-2. Si connectée, la remet dans le pool
-3. Si déconnectée ou pool plein, la ferme
+1. Verifies the connection is still connected
+2. If connected, returns it to the pool
+3. If disconnected or pool is full, closes it
 
-### Health check
+### Health Check
 
-Le health checker vérifie périodiquement:
-- Que les connexions sont toujours actives
-- Que les connexions ne sont pas trop vieilles (idle time)
+The health checker periodically verifies:
+- That connections are still active
+- That connections are not too old (idle time)
 
-Les connexions invalides sont automatiquement fermées.
+Invalid connections are automatically closed.

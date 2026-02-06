@@ -1,87 +1,87 @@
-# Métriques et observabilité
+# Metrics and Observability
 
-Le package inclut des métriques intégrées pour le monitoring.
+The package includes built-in metrics for monitoring.
 
-## Métriques Client
+## Client Metrics
 
 ### Structure
 
 ```go
 type Metrics struct {
-    RequestsTotal   Counter          // Total des requêtes envoyées
-    RequestsSuccess Counter          // Requêtes réussies
-    RequestsErrors  Counter          // Requêtes en erreur
-    Reconnections   Counter          // Nombre de reconnexions
-    ActiveConns     Counter          // Connexions actives (0 ou 1)
-    Latency         *LatencyHistogram // Histogramme de latence
+    RequestsTotal   Counter          // Total requests sent
+    RequestsSuccess Counter          // Successful requests
+    RequestsErrors  Counter          // Failed requests
+    Reconnections   Counter          // Number of reconnections
+    ActiveConns     Counter          // Active connections (0 or 1)
+    Latency         *LatencyHistogram // Latency histogram
 }
 ```
 
-### Accès aux métriques
+### Accessing Metrics
 
 ```go
 client, _ := modbus.NewClient("localhost:502")
 
-// Après quelques opérations...
+// After some operations...
 metrics := client.Metrics().Collect()
 
-fmt.Printf("Requêtes totales: %v\n", metrics["requests_total"])
-fmt.Printf("Requêtes réussies: %v\n", metrics["requests_success"])
-fmt.Printf("Erreurs: %v\n", metrics["requests_errors"])
-fmt.Printf("Reconnexions: %v\n", metrics["reconnections"])
-fmt.Printf("Connexions actives: %v\n", metrics["active_conns"])
+fmt.Printf("Total requests: %v\n", metrics["requests_total"])
+fmt.Printf("Successful requests: %v\n", metrics["requests_success"])
+fmt.Printf("Errors: %v\n", metrics["requests_errors"])
+fmt.Printf("Reconnections: %v\n", metrics["reconnections"])
+fmt.Printf("Active connections: %v\n", metrics["active_conns"])
 ```
 
-### Latence
+### Latency
 
 ```go
 metrics := client.Metrics().Collect()
 latency := metrics["latency"].(modbus.LatencyStats)
 
-fmt.Printf("Latence moyenne: %.2f ms\n", latency.Avg)
-fmt.Printf("Latence min: %.2f ms\n", latency.Min)
-fmt.Printf("Latence max: %.2f ms\n", latency.Max)
-fmt.Printf("Nombre de mesures: %d\n", latency.Count)
+fmt.Printf("Average latency: %.2f ms\n", latency.Avg)
+fmt.Printf("Min latency: %.2f ms\n", latency.Min)
+fmt.Printf("Max latency: %.2f ms\n", latency.Max)
+fmt.Printf("Number of measurements: %d\n", latency.Count)
 
-// Distribution par bucket
+// Distribution by bucket
 for bucket, count := range latency.Buckets {
     fmt.Printf("  %s: %d\n", bucket, count)
 }
 ```
 
-Les buckets de latence:
+Latency buckets:
 - 1ms, 5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 5s+
 
-### Métriques par fonction
+### Metrics by Function
 
 ```go
-// Métriques pour une fonction spécifique
+// Metrics for a specific function
 fcMetrics := client.Metrics().ForFunction(modbus.FuncReadHoldingRegisters)
-fmt.Printf("ReadHoldingRegisters - Requêtes: %d\n", fcMetrics.Requests.Value())
-fmt.Printf("ReadHoldingRegisters - Erreurs: %d\n", fcMetrics.Errors.Value())
+fmt.Printf("ReadHoldingRegisters - Requests: %d\n", fcMetrics.Requests.Value())
+fmt.Printf("ReadHoldingRegisters - Errors: %d\n", fcMetrics.Errors.Value())
 ```
 
-### Reset des métriques
+### Resetting Metrics
 
 ```go
 client.Metrics().Reset()
 ```
 
-## Métriques Serveur
+## Server Metrics
 
 ### Structure
 
 ```go
 type ServerMetrics struct {
-    RequestsTotal   Counter  // Total des requêtes reçues
-    RequestsSuccess Counter  // Requêtes traitées avec succès
-    RequestsErrors  Counter  // Requêtes en erreur
-    ActiveConns     Counter  // Connexions actives
-    TotalConns      Counter  // Total des connexions reçues
+    RequestsTotal   Counter  // Total requests received
+    RequestsSuccess Counter  // Successfully processed requests
+    RequestsErrors  Counter  // Failed requests
+    ActiveConns     Counter  // Active connections
+    TotalConns      Counter  // Total connections received
 }
 ```
 
-### Accès
+### Access
 
 ```go
 server := modbus.NewServer(handler)
@@ -89,31 +89,31 @@ server := modbus.NewServer(handler)
 // ...
 
 metrics := server.Metrics()
-fmt.Printf("Connexions actives: %d\n", metrics.ActiveConns.Value())
-fmt.Printf("Total connexions: %d\n", metrics.TotalConns.Value())
-fmt.Printf("Requêtes totales: %d\n", metrics.RequestsTotal.Value())
-fmt.Printf("Requêtes réussies: %d\n", metrics.RequestsSuccess.Value())
-fmt.Printf("Requêtes en erreur: %d\n", metrics.RequestsErrors.Value())
+fmt.Printf("Active connections: %d\n", metrics.ActiveConns.Value())
+fmt.Printf("Total connections: %d\n", metrics.TotalConns.Value())
+fmt.Printf("Total requests: %d\n", metrics.RequestsTotal.Value())
+fmt.Printf("Successful requests: %d\n", metrics.RequestsSuccess.Value())
+fmt.Printf("Failed requests: %d\n", metrics.RequestsErrors.Value())
 ```
 
-## Métriques Pool
+## Pool Metrics
 
 ### Structure
 
 ```go
 type PoolMetrics struct {
-    Gets      Counter  // Appels à Get
-    Puts      Counter  // Appels à Put
-    Hits      Counter  // Connexions réutilisées
-    Misses    Counter  // Nouvelles connexions créées
-    Timeouts  Counter  // Timeouts lors de Get
-    Created   Counter  // Total connexions créées
-    Closed    Counter  // Total connexions fermées
-    Available Counter  // Connexions disponibles
+    Gets      Counter  // Get calls
+    Puts      Counter  // Put calls
+    Hits      Counter  // Reused connections
+    Misses    Counter  // New connections created
+    Timeouts  Counter  // Timeouts during Get
+    Created   Counter  // Total connections created
+    Closed    Counter  // Total connections closed
+    Available Counter  // Currently available connections
 }
 ```
 
-### Statistiques
+### Statistics
 
 ```go
 pool, _ := modbus.NewPool("localhost:502", modbus.WithSize(10))
@@ -121,25 +121,25 @@ pool, _ := modbus.NewPool("localhost:502", modbus.WithSize(10))
 // ...
 
 stats := pool.Stats()
-fmt.Printf("Taille: %d\n", stats.Size)
-fmt.Printf("Créées: %d\n", stats.Created)
-fmt.Printf("Disponibles: %d\n", stats.Available)
+fmt.Printf("Size: %d\n", stats.Size)
+fmt.Printf("Created: %d\n", stats.Created)
+fmt.Printf("Available: %d\n", stats.Available)
 fmt.Printf("Gets: %d\n", stats.Gets)
 fmt.Printf("Puts: %d\n", stats.Puts)
 fmt.Printf("Hits: %d\n", stats.Hits)
 fmt.Printf("Misses: %d\n", stats.Misses)
 fmt.Printf("Timeouts: %d\n", stats.Timeouts)
 
-// Taux de réutilisation
+// Reuse rate
 if stats.Gets > 0 {
     hitRate := float64(stats.Hits) / float64(stats.Gets) * 100
-    fmt.Printf("Taux de réutilisation: %.1f%%\n", hitRate)
+    fmt.Printf("Reuse rate: %.1f%%\n", hitRate)
 }
 ```
 
-## Intégration Prometheus
+## Prometheus Integration
 
-Exemple d'exposition des métriques pour Prometheus:
+Example of exposing metrics for Prometheus:
 
 ```go
 package main
@@ -233,7 +233,7 @@ func main() {
 }
 ```
 
-## Intégration expvar
+## expvar Integration
 
 ```go
 import (
@@ -248,20 +248,20 @@ func init() {
 }
 ```
 
-Accès via `http://localhost:8080/debug/vars`.
+Access via `http://localhost:8080/debug/vars`.
 
 ## Counter
 
-Le type `Counter` est thread-safe:
+The `Counter` type is thread-safe:
 
 ```go
 type Counter struct {
     value int64
 }
 
-func (c *Counter) Add(delta int64)  // Ajouter (ou soustraire si négatif)
-func (c *Counter) Value() int64     // Lire la valeur
-func (c *Counter) Reset()           // Remettre à zéro
+func (c *Counter) Add(delta int64)  // Add (or subtract if negative)
+func (c *Counter) Value() int64     // Read the value
+func (c *Counter) Reset()           // Reset to zero
 ```
 
 ## LatencyHistogram
@@ -271,18 +271,18 @@ type LatencyHistogram struct {
     // ...
 }
 
-func (h *LatencyHistogram) Observe(d time.Duration)  // Enregistrer une mesure
-func (h *LatencyHistogram) Stats() LatencyStats      // Obtenir les statistiques
-func (h *LatencyHistogram) Reset()                   // Remettre à zéro
+func (h *LatencyHistogram) Observe(d time.Duration)  // Record a measurement
+func (h *LatencyHistogram) Stats() LatencyStats      // Get statistics
+func (h *LatencyHistogram) Reset()                   // Reset to zero
 ```
 
 ```go
 type LatencyStats struct {
-    Count   int64              // Nombre de mesures
-    Sum     float64            // Somme totale (ms)
-    Avg     float64            // Moyenne (ms)
+    Count   int64              // Number of measurements
+    Sum     float64            // Total sum (ms)
+    Avg     float64            // Average (ms)
     Min     float64            // Minimum (ms)
     Max     float64            // Maximum (ms)
-    Buckets map[string]int64   // Distribution par bucket
+    Buckets map[string]int64   // Distribution by bucket
 }
 ```

@@ -1,18 +1,18 @@
-# Client Modbus TCP
+# Modbus TCP Client
 
-Le client Modbus TCP permet de communiquer avec des équipements Modbus (automates, capteurs, etc.).
+The Modbus TCP client allows communication with Modbus devices (PLCs, sensors, etc.).
 
-## Création
+## Creation
 
 ```go
 client, err := modbus.NewClient(addr string, opts ...Option) (*Client, error)
 ```
 
-**Paramètres:**
-- `addr`: Adresse du serveur Modbus (ex: `"192.168.1.100:502"`)
-- `opts`: Options de configuration (voir [Options](./options.md))
+**Parameters:**
+- `addr`: Modbus server address (e.g., `"192.168.1.100:502"`)
+- `opts`: Configuration options (see [Options](./options.md))
 
-**Exemple:**
+**Example:**
 ```go
 client, err := modbus.NewClient("192.168.1.100:502",
     modbus.WithUnitID(1),
@@ -21,7 +21,7 @@ client, err := modbus.NewClient("192.168.1.100:502",
 )
 ```
 
-## Connexion et déconnexion
+## Connection and Disconnection
 
 ### Connect
 
@@ -29,7 +29,7 @@ client, err := modbus.NewClient("192.168.1.100:502",
 func (c *Client) Connect(ctx context.Context) error
 ```
 
-Établit la connexion TCP avec le serveur.
+Establishes the TCP connection with the server.
 
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -46,35 +46,35 @@ if err := client.Connect(ctx); err != nil {
 func (c *Client) Close() error
 ```
 
-Ferme la connexion proprement.
+Closes the connection properly.
 
 ```go
 defer client.Close()
 ```
 
-### État de connexion
+### Connection State
 
 ```go
 func (c *Client) IsConnected() bool
 func (c *Client) State() ConnectionState
 ```
 
-États possibles: `StateDisconnected`, `StateConnecting`, `StateConnected`
+Possible states: `StateDisconnected`, `StateConnecting`, `StateConnected`
 
-## Lecture de données
+## Reading Data
 
 ### ReadCoils (FC01)
 
-Lit les coils (bits de sortie).
+Reads coils (output bits).
 
 ```go
 func (c *Client) ReadCoils(ctx context.Context, addr, qty uint16) ([]bool, error)
 ```
 
-| Paramètre | Description |
+| Parameter | Description |
 |-----------|-------------|
-| `addr` | Adresse de départ (0-65535) |
-| `qty` | Nombre de coils (1-2000) |
+| `addr` | Starting address (0-65535) |
+| `qty` | Number of coils (1-2000) |
 
 ```go
 coils, err := client.ReadCoils(ctx, 0, 16)
@@ -83,7 +83,7 @@ coils, err := client.ReadCoils(ctx, 0, 16)
 
 ### ReadDiscreteInputs (FC02)
 
-Lit les entrées discrètes (bits d'entrée).
+Reads discrete inputs (input bits).
 
 ```go
 func (c *Client) ReadDiscreteInputs(ctx context.Context, addr, qty uint16) ([]bool, error)
@@ -95,16 +95,16 @@ inputs, err := client.ReadDiscreteInputs(ctx, 0, 8)
 
 ### ReadHoldingRegisters (FC03)
 
-Lit les registres de maintien (lecture/écriture).
+Reads holding registers (read/write).
 
 ```go
 func (c *Client) ReadHoldingRegisters(ctx context.Context, addr, qty uint16) ([]uint16, error)
 ```
 
-| Paramètre | Description |
+| Parameter | Description |
 |-----------|-------------|
-| `addr` | Adresse de départ (0-65535) |
-| `qty` | Nombre de registres (1-125) |
+| `addr` | Starting address (0-65535) |
+| `qty` | Number of registers (1-125) |
 
 ```go
 regs, err := client.ReadHoldingRegisters(ctx, 100, 10)
@@ -113,7 +113,7 @@ regs, err := client.ReadHoldingRegisters(ctx, 100, 10)
 
 ### ReadInputRegisters (FC04)
 
-Lit les registres d'entrée (lecture seule).
+Reads input registers (read-only).
 
 ```go
 func (c *Client) ReadInputRegisters(ctx context.Context, addr, qty uint16) ([]uint16, error)
@@ -123,24 +123,24 @@ func (c *Client) ReadInputRegisters(ctx context.Context, addr, qty uint16) ([]ui
 inputs, err := client.ReadInputRegisters(ctx, 0, 5)
 ```
 
-## Écriture de données
+## Writing Data
 
 ### WriteSingleCoil (FC05)
 
-Écrit un seul coil.
+Writes a single coil.
 
 ```go
 func (c *Client) WriteSingleCoil(ctx context.Context, addr uint16, value bool) error
 ```
 
 ```go
-err := client.WriteSingleCoil(ctx, 10, true)  // Active le coil 10
-err = client.WriteSingleCoil(ctx, 10, false)  // Désactive le coil 10
+err := client.WriteSingleCoil(ctx, 10, true)  // Enable coil 10
+err = client.WriteSingleCoil(ctx, 10, false)  // Disable coil 10
 ```
 
 ### WriteSingleRegister (FC06)
 
-Écrit un seul registre.
+Writes a single register.
 
 ```go
 func (c *Client) WriteSingleRegister(ctx context.Context, addr, value uint16) error
@@ -152,7 +152,7 @@ err := client.WriteSingleRegister(ctx, 100, 1234)
 
 ### WriteMultipleCoils (FC15)
 
-Écrit plusieurs coils.
+Writes multiple coils.
 
 ```go
 func (c *Client) WriteMultipleCoils(ctx context.Context, addr uint16, values []bool) error
@@ -164,7 +164,7 @@ err := client.WriteMultipleCoils(ctx, 0, []bool{true, false, true, true})
 
 ### WriteMultipleRegisters (FC16)
 
-Écrit plusieurs registres.
+Writes multiple registers.
 
 ```go
 func (c *Client) WriteMultipleRegisters(ctx context.Context, addr uint16, values []uint16) error
@@ -174,7 +174,7 @@ func (c *Client) WriteMultipleRegisters(ctx context.Context, addr uint16, values
 err := client.WriteMultipleRegisters(ctx, 100, []uint16{1111, 2222, 3333})
 ```
 
-## Fonctions de diagnostic
+## Diagnostic Functions
 
 ### ReadExceptionStatus (FC07)
 
@@ -188,14 +188,14 @@ func (c *Client) ReadExceptionStatus(ctx context.Context) (uint8, error)
 func (c *Client) Diagnostics(ctx context.Context, subFunc uint16, data []byte) ([]byte, error)
 ```
 
-Sous-fonctions disponibles:
+Available sub-functions:
 - `DiagReturnQueryData` (0x00): Echo
 - `DiagRestartCommunications` (0x01)
 - `DiagReturnDiagnosticRegister` (0x02)
 - etc.
 
 ```go
-// Test d'écho
+// Echo test
 resp, err := client.Diagnostics(ctx, modbus.DiagReturnQueryData, []byte{0x12, 0x34})
 // resp = []byte{0x12, 0x34}
 ```
@@ -217,19 +217,19 @@ serverID, err := client.ReportServerID(ctx)
 fmt.Println(string(serverID))  // "Modbus Server v1.0"
 ```
 
-## Opérations avec Unit ID spécifique
+## Operations with Specific Unit ID
 
-Toutes les méthodes ont une variante `WithUnit` pour spécifier un Unit ID différent:
+All methods have a `WithUnit` variant to specify a different Unit ID:
 
 ```go
-// Utilise le Unit ID par défaut
+// Uses the default Unit ID
 regs, _ := client.ReadHoldingRegisters(ctx, 0, 10)
 
-// Utilise un Unit ID spécifique
+// Uses a specific Unit ID
 regs, _ := client.ReadHoldingRegistersWithUnit(ctx, modbus.UnitID(2), 0, 10)
 ```
 
-Méthodes disponibles:
+Available methods:
 - `ReadCoilsWithUnit`
 - `ReadDiscreteInputsWithUnit`
 - `ReadHoldingRegistersWithUnit`
@@ -239,23 +239,23 @@ Méthodes disponibles:
 - `WriteMultipleCoilsWithUnit`
 - `WriteMultipleRegistersWithUnit`
 
-## Gestion du Unit ID
+## Unit ID Management
 
 ```go
-// Définir le Unit ID par défaut
+// Set the default Unit ID
 client.SetUnitID(modbus.UnitID(2))
 
-// Récupérer le Unit ID actuel
+// Get the current Unit ID
 unitID := client.UnitID()
 ```
 
-## Métriques
+## Metrics
 
 ```go
 metrics := client.Metrics().Collect()
-fmt.Printf("Requêtes totales: %v\n", metrics["requests_total"])
-fmt.Printf("Requêtes réussies: %v\n", metrics["requests_success"])
-fmt.Printf("Erreurs: %v\n", metrics["requests_errors"])
+fmt.Printf("Total requests: %v\n", metrics["requests_total"])
+fmt.Printf("Successful requests: %v\n", metrics["requests_success"])
+fmt.Printf("Errors: %v\n", metrics["requests_errors"])
 ```
 
-Voir [Métriques](./metrics.md) pour plus de détails.
+See [Metrics](./metrics.md) for more details.

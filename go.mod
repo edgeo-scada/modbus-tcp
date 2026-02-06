@@ -1,6 +1,6 @@
 module github.com/edgeo-scada/modbus-tcp
 
-go 1.21
+go 1.23
 
 require (
 	github.com/edgeo-scada/modbus-tcp/modbus v0.0.0

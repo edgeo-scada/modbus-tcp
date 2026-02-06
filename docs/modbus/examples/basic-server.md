@@ -1,8 +1,8 @@
-# Exemple: Serveur Modbus
+# Example: Modbus Server
 
-Un exemple complet de serveur Modbus TCP avec le handler en mémoire.
+A complete example of a Modbus TCP server with the memory handler.
 
-## Code source
+## Source Code
 
 ```go
 package main
@@ -92,19 +92,19 @@ func main() {
 }
 ```
 
-## Exécution
+## Running
 
 ```bash
-# Port par défaut (502) - nécessite root/admin
+# Default port (502) - requires root/admin
 sudo go run main.go
 
-# Port alternatif (ne nécessite pas root)
+# Alternative port (does not require root)
 go run main.go -addr :1502
 ```
 
-## Handler personnalisé
+## Custom Handler
 
-Exemple d'un handler qui simule un capteur de température:
+Example of a handler that simulates a temperature sensor:
 
 ```go
 package main
@@ -130,7 +130,7 @@ func NewTemperatureSensorHandler() *TemperatureSensorHandler {
         humidity:    50.0,
     }
 
-    // Simuler des variations de température
+    // Simulate temperature variations
     go func() {
         for {
             time.Sleep(1 * time.Second)
@@ -151,9 +151,9 @@ func NewTemperatureSensorHandler() *TemperatureSensorHandler {
     return h
 }
 
-// ReadInputRegisters retourne la température et l'humidité
-// Registre 0: Température * 100 (ex: 2050 = 20.50°C)
-// Registre 1: Humidité * 100 (ex: 5025 = 50.25%)
+// ReadInputRegisters returns temperature and humidity
+// Register 0: Temperature * 100 (e.g., 2050 = 20.50°C)
+// Register 1: Humidity * 100 (e.g., 5025 = 50.25%)
 func (h *TemperatureSensorHandler) ReadInputRegisters(unitID modbus.UnitID, addr, qty uint16) ([]uint16, error) {
     if addr > 1 || addr+qty > 2 {
         return nil, modbus.NewModbusError(
@@ -177,8 +177,8 @@ func (h *TemperatureSensorHandler) ReadInputRegisters(unitID modbus.UnitID, addr
     return values, nil
 }
 
-// ReadHoldingRegisters - Configuration (lecture/écriture)
-// Registre 0: Intervalle de mise à jour (secondes)
+// ReadHoldingRegisters - Configuration (read/write)
+// Register 0: Update interval (seconds)
 func (h *TemperatureSensorHandler) ReadHoldingRegisters(unitID modbus.UnitID, addr, qty uint16) ([]uint16, error) {
     if addr > 0 || addr+qty > 1 {
         return nil, modbus.NewModbusError(
@@ -186,10 +186,10 @@ func (h *TemperatureSensorHandler) ReadHoldingRegisters(unitID modbus.UnitID, ad
             modbus.ExceptionIllegalDataAddress,
         )
     }
-    return []uint16{1}, nil // Intervalle fixe de 1 seconde
+    return []uint16{1}, nil // Fixed 1 second interval
 }
 
-// Les autres méthodes retournent des erreurs "fonction non supportée"
+// Other methods return "function not supported" errors
 func (h *TemperatureSensorHandler) ReadCoils(unitID modbus.UnitID, addr, qty uint16) ([]bool, error) {
     return nil, modbus.NewModbusError(modbus.FuncReadCoils, modbus.ExceptionIllegalFunction)
 }
@@ -242,12 +242,12 @@ func main() {
 }
 ```
 
-## Test avec le client
+## Testing with the Client
 
 ```bash
-# Dans un terminal, lancer le serveur
+# In one terminal, start the server
 go run server/main.go -addr :1502
 
-# Dans un autre terminal, lancer le client
+# In another terminal, run the client
 go run client/main.go -addr localhost:1502
 ```
