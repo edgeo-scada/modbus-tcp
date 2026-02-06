@@ -1,14 +1,11 @@
-module github.com/edgeo-scada/modbus-tcp
+module github.com/edgeo-scada/modbus
 
 go 1.23
 
 require (
-	github.com/edgeo-scada/modbus-tcp/modbus v0.0.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 )
-
-replace github.com/edgeo-scada/modbus-tcp/modbus => ./modbus
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
